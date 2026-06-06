@@ -23,7 +23,7 @@ class QuestCard extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Card(
-      color: const Color(0xFF2A1B3D),
+      color: const Color.fromARGB(255, 41, 24, 2),
       margin: const EdgeInsets.only(bottom: 14),
       shape: RoundedRectangleBorder(
         borderRadius: BorderRadius.circular(18),
@@ -58,18 +58,6 @@ class QuestCard extends StatelessWidget {
                     spacing: 12,
                     runSpacing: 4,
                     children: [
-                      Text(
-                        '+$goldReward gold',
-                        style: const TextStyle(color: Colors.amber, fontSize: 14),
-                      ),
-                      Text(
-                        '+$silverReward silver',
-                        style: const TextStyle(color: Colors.grey, fontSize: 14),
-                      ),
-                      Text(
-                        '+$xpReward XP',
-                        style: const TextStyle(color: Colors.blue, fontSize: 14),
-                      ),
                     ],
                   ),
                 ],

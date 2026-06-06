@@ -11,7 +11,7 @@ class ModApp extends StatelessWidget {
       debugShowCheckedModeBanner: false,
       theme: ThemeData(
         brightness: Brightness.dark,
-        scaffoldBackgroundColor: const Color(0xFF1A1028),
+        scaffoldBackgroundColor: const Color.fromARGB(255, 255, 255, 255),
         colorScheme: ColorScheme.fromSeed(
           seedColor: Colors.amber,
           brightness: Brightness.dark,

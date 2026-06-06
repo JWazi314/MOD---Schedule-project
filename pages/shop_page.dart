@@ -19,7 +19,7 @@ class ShopPage extends StatelessWidget {
       child: ConstrainedBox(
         constraints: const BoxConstraints(maxWidth: 650),
         child: Padding(
-          padding: const EdgeInsets.all(18),q
+          padding: const EdgeInsets.all(18),
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.stretch,
             children: [

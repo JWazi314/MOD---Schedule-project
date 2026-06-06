@@ -4,6 +4,7 @@ class PlayerCard extends StatelessWidget {
   final int gold;
   final int silver;
   final int xp;
+  final int happiness = 75;
 
   const PlayerCard({
     super.key,
@@ -19,7 +20,7 @@ class PlayerCard extends StatelessWidget {
     return Container(
       padding: const EdgeInsets.all(18),
       decoration: BoxDecoration(
-        color: const Color(0xFF2A1B3D),
+        color: const Color.fromARGB(255, 41, 24, 2),
         borderRadius: BorderRadius.circular(20),
         border: Border.all(color: Colors.amber, width: 1.5),
       ),
@@ -27,7 +28,7 @@ class PlayerCard extends StatelessWidget {
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           const Text(
-            'JWazi',
+            'Jack',
             style: TextStyle(fontSize: 24, fontWeight: FontWeight.bold),
           ),
           const SizedBox(height: 8),
@@ -46,7 +47,9 @@ class PlayerCard extends StatelessWidget {
             value: xpProgress,
             minHeight: 10,
             borderRadius: BorderRadius.circular(10),
-          ),
+            backgroundColor: Colors.grey.shade800,
+            valueColor: AlwaysStoppedAnimation<Color>(const Color.fromARGB(255, 0, 22, 148)),
+          ),           
         ],
       ),
     );
