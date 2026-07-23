@@ -2,6 +2,7 @@
 import '../widgets/player_card.dart';
 import '../widgets/quest_card.dart';
 import 'shop_page.dart';
+import 'inventory_page.dart';
 
 class QuestHomePage extends StatefulWidget {
   const QuestHomePage({super.key});
@@ -14,6 +15,8 @@ class QuestHomePageState extends State<QuestHomePage> {
   int silver = 0;
   int gold = 0;
   int xp = 0;
+
+  List<String> inventory = [];
 
   String currentPage = 'quests';
 
@@ -45,24 +48,36 @@ class QuestHomePageState extends State<QuestHomePage> {
     });
   }
 
-  void buyItem(int cost, String title) {
-    setState(() {
-      gold -= cost;
-    });
-    ScaffoldMessenger.of(context).showSnackBar(
-      SnackBar(content: Text('Bought $title for $cost gold!')),
-    );
-  }
+void buyItem(int cost, String title) {
+  setState(() {
+    gold -= cost;
+    inventory.add(title);
+  });
 
-  Widget getCurrentPage() {
-    if (currentPage == 'shop') {
-      return ShopPage(silver: silver, gold: gold, onBuy: buyItem);
-    } else if (currentPage == 'settings') {
-      return buildSettingsPage();
-    } else {
-      return buildQuestBoard();
-    }
+  ScaffoldMessenger.of(context).showSnackBar(
+    SnackBar(
+      content: Text('Added $title to your inventory!'),
+    ),
+  );
+}
+
+Widget getCurrentPage() {
+  if (currentPage == 'shop') {
+    return ShopPage(
+      silver: silver,
+      gold: gold,
+      onBuy: buyItem,
+    );
+  } else if (currentPage == 'inventory') {
+      return InventoryPage(
+      inventory: inventory,
+    );
+  } else if (currentPage == 'settings') {
+    return buildSettingsPage();
+  } else {
+    return buildQuestBoard();
   }
+}
 
   Widget buildQuestBoard() {
   return Center(
@@ -223,39 +238,76 @@ Widget build(BuildContext context) {
 
 const SizedBox(width: 5),
 
-          Column(
-          mainAxisSize: MainAxisSize.min,
-          children: [
-            TextButton.icon(
-              style: TextButton.styleFrom(
-                foregroundColor: Colors.white,
-                overlayColor: Colors.white.withAlpha(35),
-              ),
-              icon: const Icon(Icons.store, size: 30),
-              label: const Text(
-                'Shop',
-                style: TextStyle(fontSize: 25),
-              ),
-              onPressed: () {
-                setState(() {
-                  currentPage = 'shop';
-                });
-              },
-            ),
-
-    Transform.translate(offset: const Offset(0,5),
-    child: Container(
-      height: 3,
-      width: 100,
-      color: currentPage == 'shop'
-          ? Colors.white
-          : Colors.grey
+ Column(
+  mainAxisSize: MainAxisSize.min,
+  children: [
+    TextButton.icon(
+      style: TextButton.styleFrom(
+        foregroundColor: Colors.white,
+        overlayColor: Colors.white.withAlpha(35),
+      ),
+      icon: const Icon(Icons.store, size: 30),
+      label: const Text(
+        'Shop',
+        style: TextStyle(fontSize: 25),
+      ),
+      onPressed: () {
+        setState(() {
+          currentPage = 'shop';
+        });
+      },
     ),
-    )
+
+    Transform.translate(
+      offset: const Offset(0, 5),
+      child: Container(
+        height: 3,
+        width: 100,
+        color: currentPage == 'shop'
+            ? Colors.white
+            : Colors.grey,
+      ),
+    ),
   ],
-)
-]
 ),
+
+const SizedBox(width: 5),
+
+Column(
+  mainAxisSize: MainAxisSize.min,
+  children: [
+    TextButton.icon(
+      style: TextButton.styleFrom(
+        foregroundColor: Colors.white,
+        overlayColor: Colors.white.withAlpha(35),
+      ),
+      icon: const Icon(Icons.backpack, size: 30),
+      label: const Text(
+        'Inventory',
+        style: TextStyle(fontSize: 25),
+      ),
+      onPressed: () {
+        setState(() {
+          currentPage = 'inventory';
+        });
+      },
+    ),
+
+    Transform.translate(
+      offset: const Offset(0, 5),
+      child: Container(
+        height: 3,
+        width: 140,
+        color: currentPage == 'inventory'
+            ? Colors.white
+            : Colors.grey,
+      ),
+    ),
+  ],
+),
+
+        ],
+      ),
 
       backgroundColor: const Color.fromARGB(255, 49, 44, 44),
 
