@@ -1,7 +1,8 @@
-﻿import 'package:flutter/material.dart';
+import 'package:flutter/material.dart';
 import '../widgets/player_card.dart';
 import '../widgets/quest_card.dart';
 import 'shop_page.dart';
+import 'settings_page.dart';
 
 class QuestHomePage extends StatefulWidget {
   const QuestHomePage({super.key});
@@ -68,7 +69,7 @@ class QuestHomePageState extends State<QuestHomePage> {
   return Center(
     child: ConstrainedBox(
       constraints: const BoxConstraints(maxWidth: 650),
-      child: Padding(
+      child: SingleChildScrollView(
         padding: const EdgeInsets.all(20),
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.stretch,
@@ -142,8 +143,6 @@ class QuestHomePageState extends State<QuestHomePage> {
               ),
             ),
 
-            const Spacer(),
-
             Card(
               color: const Color.fromARGB(255, 192, 191, 194),
               child: Padding(
@@ -165,11 +164,11 @@ class QuestHomePageState extends State<QuestHomePage> {
 }
 
 
-  Widget buildSettingsPage() {
-    return const Center(
-      child: Text('Settings page goes here', style: TextStyle(fontSize: 24)),
-    );
-  }
+Widget buildSettingsPage() {
+  return SettingsPage(
+    onResetDay: resetDay,
+  );
+}
 
 @override
 Widget build(BuildContext context) {
