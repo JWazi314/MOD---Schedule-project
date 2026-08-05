@@ -1,12 +1,15 @@
 ﻿import 'package:flutter/material.dart';
+import 'dart:convert';
+
+import 'package:shared_preferences/shared_preferences.dart';
+
 import '../widgets/player_card.dart';
 import '../widgets/quest_card.dart';
+import 'inventory_page.dart';
 import 'shop_page.dart';
 import '../models/task.dart';
 import 'settings_page.dart';
 import 'statistics_page.dart';
-import 'dart:convert';
-import 'package:shared_preferences/shared_preferences.dart';
 
 //Home page class (stateful due to changing variables while app runs)
 class QuestHomePage extends StatefulWidget {
@@ -27,58 +30,54 @@ class QuestHomePageState extends State<QuestHomePage> {
   String currentPage = 'quests';
 
   List<Task> tasks = [];
+  List<String> inventory = [];
+
   @override
-void initState() {
-  super.initState();
-  loadProgress();
-}
+  void initState() {
+    super.initState();
+    loadProgress();
+  }
 
-Future<void> saveProgress() async {
-  final prefs = await SharedPreferences.getInstance();
+  Future<void> saveProgress() async {
+    final prefs = await SharedPreferences.getInstance();
+    final taskData = tasks.map((task) => task.toJson()).toList();
 
-  await prefs.setInt('gold', gold);
-  await prefs.setInt('silver', silver);
-  await prefs.setInt('xp', xp);
+    await prefs.setInt('gold', gold);
+    await prefs.setInt('silver', silver);
+    await prefs.setInt('xp', xp);
+    await prefs.setString('tasks', jsonEncode(taskData));
+    await prefs.setStringList('inventory', inventory);
+  }
 
-  final taskData = tasks.map((task) => task.toJson()).toList();
+  Future<void> loadProgress() async {
+    final prefs = await SharedPreferences.getInstance();
+    final savedTasks = prefs.getString('tasks');
+    List<Task> loadedTasks = [];
 
-  await prefs.setString(
-    'tasks',
-    jsonEncode(taskData),
-  );
-}
-
-Future<void> loadProgress() async {
-  final prefs = await SharedPreferences.getInstance();
-
-  final savedTasks = prefs.getString('tasks');
-  List<Task> loadedTasks = [];
-
-  if (savedTasks != null) {
-    try {
-      final decodedTasks = jsonDecode(savedTasks) as List<dynamic>;
-
-      loadedTasks = decodedTasks.map((item) {
-        return Task.fromJson(
-          Map<String, dynamic>.from(item as Map),
-        );
-      }).toList();
-    } catch (error) {
-      debugPrint('Failed to load tasks: $error');
+    if (savedTasks != null) {
+      try {
+        final decodedTasks = jsonDecode(savedTasks) as List<dynamic>;
+        loadedTasks = decodedTasks
+            .whereType<Map>()
+            .map((item) => Task.fromJson(Map<String, dynamic>.from(item)))
+            .toList();
+      } catch (error) {
+        debugPrint('Failed to load saved tasks: $error');
+      }
     }
-  }
 
-  if (!mounted) {
-    return;
-  }
+    if (!mounted) {
+      return;
+    }
 
-  setState(() {
-    gold = prefs.getInt('gold') ?? 0;
-    silver = prefs.getInt('silver') ?? 0;
-    xp = prefs.getInt('xp') ?? 0;
-    tasks = loadedTasks;
-  });
-}
+    setState(() {
+      gold = prefs.getInt('gold') ?? 0;
+      silver = prefs.getInt('silver') ?? 0;
+      xp = prefs.getInt('xp') ?? 0;
+      tasks = loadedTasks;
+      inventory = prefs.getStringList('inventory') ?? [];
+    });
+  }
 
   void completeTask(Task task) {
     if (task.isDone) {
@@ -155,10 +154,7 @@ Future<void> loadProgress() async {
                     const Align(
                       alignment: Alignment.centerLeft,
 
-                      child: Text(
-                        'Difficulty',
-                        style: TextStyle(fontSize: 16, color: Colors.white),
-                      ),
+                      child: Text('Difficulty', style: TextStyle(fontSize: 16)),
                     ),
 
                     const SizedBox(height: 10),
@@ -227,7 +223,7 @@ Future<void> loadProgress() async {
 
                       child: Text(
                         'Days Repeated',
-                        style: TextStyle(fontSize: 16, color: Colors.white),
+                        style: TextStyle(fontSize: 16),
                       ),
                     ),
 
@@ -272,6 +268,7 @@ Future<void> loadProgress() async {
                   ],
                 ),
               ),
+
               actions: [
                 TextButton(
                   onPressed: () {
@@ -378,10 +375,7 @@ Future<void> loadProgress() async {
                     const Align(
                       alignment: Alignment.centerLeft,
 
-                      child: Text(
-                        'Difficulty',
-                        style: TextStyle(fontSize: 16, color: Colors.white),
-                      ),
+                      child: Text('Difficulty', style: TextStyle(fontSize: 16)),
                     ),
 
                     const SizedBox(height: 10),
@@ -450,7 +444,7 @@ Future<void> loadProgress() async {
 
                       child: Text(
                         'Days Repeated',
-                        style: TextStyle(fontSize: 16, color: Colors.white),
+                        style: TextStyle(fontSize: 16),
                       ),
                     ),
 
@@ -522,9 +516,7 @@ Future<void> loadProgress() async {
                       setState(() {
                         tasks.add(newTask);
                       });
-                      
                       saveProgress();
-
                       Navigator.of(context).pop();
                     }
                   },
@@ -544,46 +536,71 @@ Future<void> loadProgress() async {
     setState(() {
       for (int i = 0; i < taskamount; i++) {
         tasks[i].isDone = false;
+        tasks[i].completedAt = null;
       }
     });
+    saveProgress();
+  }
 
+  void resetAllProgress() {
+    setState(() {
+      tasks.clear();
+      inventory.clear();
+      gold = 0;
+      silver = 0;
+      xp = 0;
+      currentPage = 'quests';
+    });
     saveProgress();
   }
 
   void buyItem(int cost, String title) {
+    if (gold < cost) {
+      return;
+    }
+
     setState(() {
       gold -= cost;
+      inventory.add(title);
     });
-    
+    saveProgress();
+    ScaffoldMessenger.of(
+      context,
+    ).showSnackBar(SnackBar(content: Text('$title was added to inventory!')));
+  }
+
+  void useInventoryItem(String title) {
+    final itemIndex = inventory.indexOf(title);
+
+    if (itemIndex == -1) {
+      return;
+    }
+
+    setState(() {
+      inventory.removeAt(itemIndex);
+    });
     saveProgress();
 
     ScaffoldMessenger.of(
       context,
-    ).showSnackBar(SnackBar(content: Text('Bought $title for $cost gold!')));
+    ).showSnackBar(SnackBar(content: Text('Used $title.')));
   }
 
+  // function allows us to return the bottom part of the page while keeping the original app bar in the scaffold.  Creates a seemless single page system instead of full new loading pages.
   Widget getCurrentPage() {
-  if (currentPage == 'shop') {
-    return ShopPage(
-      silver: silver,
-      gold: gold,
-      onBuy: buyItem,
-    );
-  } else if (currentPage == 'statistics') {
-    return StatisticsPage(
-      tasks: tasks,
-      gold: gold,
-      silver: silver,
-      xp: xp,
-    );
-  } else if (currentPage == 'settings') {
-    return SettingsPage(
-      onResetDay: resetDay,
-    );
-  } else {
-    return buildQuestBoard();
+    if (currentPage == 'shop') {
+      return ShopPage(silver: silver, gold: gold, onBuy: buyItem);
+    } else if (currentPage == 'inventory') {
+      return InventoryPage(inventory: inventory, onUse: useInventoryItem);
+    } else if (currentPage == 'statistics') {
+      return StatisticsPage(tasks: tasks, gold: gold, silver: silver, xp: xp);
+    } else if (currentPage == 'settings') {
+      return SettingsPage(onResetDay: resetDay, onResetAll: resetAllProgress);
+    } else {
+      return buildQuestBoard();
+    }
   }
-}
+
   //the section showing tasks along with the players information
   Widget buildQuestBoard() {
     return Center(
@@ -765,11 +782,25 @@ Future<void> loadProgress() async {
         actions: [
           IconButton(
             icon: const Icon(Icons.refresh),
+            color: Colors.white,
             tooltip: 'Reset Day',
             onPressed: resetDay,
           ),
+
+          IconButton(
+            icon: const Icon(Icons.backpack),
+            tooltip: 'Inventory',
+            color: Colors.white,
+            onPressed: () {
+              setState(() {
+                currentPage = 'inventory';
+              });
+            },
+          ),
+
           IconButton(
             icon: const Icon(Icons.bar_chart),
+            color: Colors.white,
             tooltip: 'Statistics',
             onPressed: () {
               setState(() {
@@ -777,8 +808,10 @@ Future<void> loadProgress() async {
               });
             },
           ),
+
           IconButton(
             icon: const Icon(Icons.settings),
+            color: Colors.white,
             tooltip: 'Settings',
             onPressed: () {
               setState(() {

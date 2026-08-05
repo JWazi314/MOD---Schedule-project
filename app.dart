@@ -1,4 +1,4 @@
-import 'package:flutter/material.dart';
+﻿import 'package:flutter/material.dart';
 import 'pages/home_page.dart';
 
 class ModApp extends StatelessWidget {
@@ -10,11 +10,11 @@ class ModApp extends StatelessWidget {
       title: 'Mod',
       debugShowCheckedModeBanner: false,
       theme: ThemeData(
-        brightness: Brightness.dark,
+        brightness: Brightness.light,
         scaffoldBackgroundColor: const Color.fromARGB(255, 255, 255, 255),
         colorScheme: ColorScheme.fromSeed(
-          seedColor: Colors.amber,
-          brightness: Brightness.dark,
+          seedColor: Colors.green,
+          brightness: Brightness.light,
         ),
       ),
       home: const QuestHomePage(),

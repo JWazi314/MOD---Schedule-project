@@ -18,10 +18,13 @@ class ShopPage extends StatelessWidget {
     return Center(
       child: ConstrainedBox(
         constraints: const BoxConstraints(maxWidth: 650),
+
         child: Padding(
           padding: const EdgeInsets.all(18),
+
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.stretch,
+
             children: [
               const Text(
                 'Reward Shop',
@@ -31,9 +34,13 @@ class ShopPage extends StatelessWidget {
                   color: Colors.amber,
                 ),
               ),
+
               const SizedBox(height: 12),
+
               Text('Gold: $gold', style: const TextStyle(fontSize: 22)),
+
               const SizedBox(height: 20),
+
               ShopItemCard(
                 title: 'Cheat Meal',
                 cost: 100,
@@ -41,6 +48,7 @@ class ShopPage extends StatelessWidget {
                 gold: gold,
                 onBuy: () => onBuy(100, 'Cheat Meal'),
               ),
+
               ShopItemCard(
                 title: 'Gaming Night',
                 cost: 75,
@@ -48,6 +56,7 @@ class ShopPage extends StatelessWidget {
                 gold: gold,
                 onBuy: () => onBuy(75, 'Gaming Night'),
               ),
+
               ShopItemCard(
                 title: 'Energy Drink',
                 cost: 30,

@@ -19,18 +19,32 @@ class QuestCard extends StatelessWidget {
     required this.onDelete,
   });
 
+  Color taskColor(Task task) {
+    if (task.difficulty == 0) {
+      return Colors.green;
+    } else if (task.difficulty == 1) {
+      return Colors.amber;
+    } else if (task.difficulty == 2) {
+      return Colors.red;
+    }
+
+    return Colors.grey;
+  }
+
   @override
   Widget build(BuildContext context) {
     return Card(
       // Information on the card format
-      color: const Color.fromARGB(255, 41, 24, 2),
-      margin: const EdgeInsets.only(bottom: 14),
+      color: const Color.fromARGB(50, 50, 50, 50),
+      margin: const EdgeInsets.only(bottom: 10),
       shape: RoundedRectangleBorder(
-        borderRadius: BorderRadius.circular(18),
+        borderRadius: BorderRadius.circular(25),
 
         side: BorderSide(
-          color: isDone ? const Color.fromARGB(255, 51, 255, 0) : Colors.amber,
-          width: 1.4,
+          color: isDone
+              ? const Color.fromARGB(255, 51, 255, 0)
+              : taskColor(task),
+          width: 1.8,
         ),
       ),
 
@@ -45,10 +59,10 @@ class QuestCard extends StatelessWidget {
               child: InkWell(
                 onTap: onEdit,
 
-                borderRadius: BorderRadius.circular(10),
-                hoverColor: Colors.white.withValues(alpha: 0.08),
+                borderRadius: BorderRadius.circular(20),
+                hoverColor: taskColor(task).withValues(alpha: 0.2),
                 splashColor: Colors.transparent,
-                highlightColor: Colors.transparent,
+                highlightColor: taskColor(task),
 
                 child: Padding(
                   padding: const EdgeInsets.symmetric(

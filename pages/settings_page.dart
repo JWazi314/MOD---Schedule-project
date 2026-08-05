@@ -1,22 +1,14 @@
 import 'package:flutter/material.dart';
 
-class SettingsPage extends StatefulWidget {
+class SettingsPage extends StatelessWidget {
   final VoidCallback onResetDay;
+  final VoidCallback onResetAll;
 
   const SettingsPage({
     super.key,
     required this.onResetDay,
+    required this.onResetAll,
   });
-
-  @override
-  State<SettingsPage> createState() => _SettingsPageState();
-}
-
-class _SettingsPageState extends State<SettingsPage> {
-  bool notificationsEnabled = true;
-  bool soundEnabled = true;
-  bool dailyResetEnabled = true;
-  bool darkModeEnabled = true;
 
   @override
   Widget build(BuildContext context) {
@@ -33,127 +25,40 @@ class _SettingsPageState extends State<SettingsPage> {
                 style: TextStyle(
                   fontSize: 28,
                   fontWeight: FontWeight.bold,
-                  color: Colors.amber,
+                  color: Colors.green,
                 ),
               ),
               const SizedBox(height: 20),
-
-              const _SectionTitle(
-                title: 'Profile',
-                icon: Icons.person,
-              ),
+              const _SectionTitle(title: 'Profile', icon: Icons.person),
               _SettingsCard(
+                borderColor: Colors.amber,
                 child: ListTile(
                   leading: const CircleAvatar(
                     backgroundColor: Colors.amber,
-                    child: Icon(
-                      Icons.person,
-                      color: Colors.black,
-                    ),
+                    child: Icon(Icons.person, color: Colors.black),
                   ),
                   title: const Text(
-                    'Your Mod',
+                    'User',
                     style: TextStyle(fontWeight: FontWeight.bold),
                   ),
-                  subtitle: const Text('Player profile and preferences'),
+                  subtitle: const Text('MOD player profile'),
                   trailing: const Icon(Icons.chevron_right),
                   onTap: () {
                     ScaffoldMessenger.of(context).showSnackBar(
                       const SnackBar(
-                        content: Text('Profile editing coming soon.'),
+                        content: Text('Profile editing is coming soon.'),
                       ),
                     );
                   },
                 ),
               ),
-
               const SizedBox(height: 22),
-
-              const _SectionTitle(
-                title: 'Preferences',
-                icon: Icons.tune,
-              ),
-              _SettingsCard(
-                child: Column(
-                  children: [
-                    SwitchListTile(
-                      secondary: const Icon(
-                        Icons.notifications,
-                        color: Colors.amber,
-                      ),
-                      title: const Text('Notifications'),
-                      subtitle: const Text(
-                        'Receive reminders for daily quests.',
-                      ),
-                      value: notificationsEnabled,
-                      onChanged: (value) {
-                        setState(() {
-                          notificationsEnabled = value;
-                        });
-                      },
-                    ),
-                    const Divider(height: 1),
-                    SwitchListTile(
-                      secondary: const Icon(
-                        Icons.volume_up,
-                        color: Colors.amber,
-                      ),
-                      title: const Text('Sound Effects'),
-                      subtitle: const Text(
-                        'Play sounds when quests are completed.',
-                      ),
-                      value: soundEnabled,
-                      onChanged: (value) {
-                        setState(() {
-                          soundEnabled = value;
-                        });
-                      },
-                    ),
-                    const Divider(height: 1),
-                    SwitchListTile(
-                      secondary: const Icon(
-                        Icons.refresh,
-                        color: Colors.amber,
-                      ),
-                      title: const Text('Automatic Daily Reset'),
-                      subtitle: const Text(
-                        'Reset daily quests at the start of a new day.',
-                      ),
-                      value: dailyResetEnabled,
-                      onChanged: (value) {
-                        setState(() {
-                          dailyResetEnabled = value;
-                        });
-                      },
-                    ),
-                    const Divider(height: 1),
-                    SwitchListTile(
-                      secondary: const Icon(
-                        Icons.dark_mode,
-                        color: Colors.amber,
-                      ),
-                      title: const Text('Dark Mode'),
-                      subtitle: const Text(
-                        'Use the dark MOD interface.',
-                      ),
-                      value: darkModeEnabled,
-                      onChanged: (value) {
-                        setState(() {
-                          darkModeEnabled = value;
-                        });
-                      },
-                    ),
-                  ],
-                ),
-              ),
-
-              const SizedBox(height: 22),
-
               const _SectionTitle(
                 title: 'Quest Management',
                 icon: Icons.task_alt,
               ),
               _SettingsCard(
+                borderColor: Colors.orange,
                 child: ListTile(
                   leading: const Icon(
                     Icons.restart_alt,
@@ -161,79 +66,52 @@ class _SettingsPageState extends State<SettingsPage> {
                   ),
                   title: const Text('Reset Daily Quests'),
                   subtitle: const Text(
-                    'Mark all daily quests as incomplete.',
+                    'Mark every quest as incomplete while keeping rewards.',
                   ),
                   trailing: const Icon(Icons.chevron_right),
-                  onTap: _showResetConfirmation,
+                  onTap: () => _showResetDayConfirmation(context),
                 ),
               ),
-
               const SizedBox(height: 22),
-
-              const _SectionTitle(
-                title: 'Data',
-                icon: Icons.storage,
-              ),
+              const _SectionTitle(title: 'Data', icon: Icons.storage),
               _SettingsCard(
+                borderColor: Colors.green,
                 child: Column(
                   children: [
-                    ListTile(
-                      leading: const Icon(
-                        Icons.cloud_sync,
-                        color: Colors.lightBlueAccent,
+                    const ListTile(
+                      leading: Icon(Icons.save, color: Colors.green),
+                      title: Text('Automatic Local Saving'),
+                      subtitle: Text(
+                        'Tasks, inventory, completion status, currency, and XP '
+                        'are saved.',
                       ),
-                      title: const Text('Sync Progress'),
-                      subtitle: const Text(
-                        'Cloud syncing will be available later.',
-                      ),
-                      trailing: const Icon(Icons.chevron_right),
-                      onTap: () {
-                        ScaffoldMessenger.of(context).showSnackBar(
-                          const SnackBar(
-                            content: Text('Cloud sync coming soon.'),
-                          ),
-                        );
-                      },
+                      trailing: Icon(Icons.check_circle, color: Colors.green),
                     ),
                     const Divider(height: 1),
                     ListTile(
                       leading: const Icon(
                         Icons.delete_forever,
-                        color: Colors.redAccent,
+                        color: Colors.red,
                       ),
                       title: const Text('Reset All Progress'),
                       subtitle: const Text(
-                        'Delete quests, rewards, XP, and currency.',
+                        'Delete every quest and inventory item, then reset '
+                        'currency and XP.',
                       ),
                       trailing: const Icon(Icons.chevron_right),
-                      onTap: () {
-                        ScaffoldMessenger.of(context).showSnackBar(
-                          const SnackBar(
-                            content: Text(
-                              'Full progress reset is not available yet.',
-                            ),
-                          ),
-                        );
-                      },
+                      onTap: () => _showResetAllConfirmation(context),
                     ),
                   ],
                 ),
               ),
-
               const SizedBox(height: 22),
-
-              const _SectionTitle(
-                title: 'About',
-                icon: Icons.info_outline,
-              ),
+              const _SectionTitle(title: 'About', icon: Icons.info_outline),
               const _SettingsCard(
+                borderColor: Colors.grey,
                 child: Column(
                   children: [
                     ListTile(
-                      leading: Icon(
-                        Icons.apps,
-                        color: Colors.amber,
-                      ),
+                      leading: Icon(Icons.apps, color: Colors.green),
                       title: Text('MOD'),
                       subtitle: Text(
                         'Complete real-life quests and grow your Mod.',
@@ -241,10 +119,7 @@ class _SettingsPageState extends State<SettingsPage> {
                     ),
                     Divider(height: 1),
                     ListTile(
-                      leading: Icon(
-                        Icons.code,
-                        color: Colors.amber,
-                      ),
+                      leading: Icon(Icons.code, color: Colors.green),
                       title: Text('Version'),
                       trailing: Text('1.0.0'),
                     ),
@@ -258,40 +133,77 @@ class _SettingsPageState extends State<SettingsPage> {
     );
   }
 
-  void _showResetConfirmation() {
-    showDialog<void>(
+  Future<void> _showResetDayConfirmation(BuildContext context) async {
+    final shouldReset = await showDialog<bool>(
       context: context,
       builder: (dialogContext) {
         return AlertDialog(
           title: const Text('Reset Daily Quests?'),
           content: const Text(
-            'This will mark all daily quests as incomplete. '
-            'Your gold, silver, and XP will stay the same.',
+            'This marks every quest as incomplete. Gold, silver, and XP stay '
+            'the same.',
           ),
           actions: [
             TextButton(
-              onPressed: () {
-                Navigator.pop(dialogContext);
-              },
+              onPressed: () => Navigator.pop(dialogContext, false),
               child: const Text('Cancel'),
             ),
             ElevatedButton(
-              onPressed: () {
-                Navigator.pop(dialogContext);
-                widget.onResetDay();
-
-                ScaffoldMessenger.of(context).showSnackBar(
-                  const SnackBar(
-                    content: Text('Daily quests were reset.'),
-                  ),
-                );
-              },
+              onPressed: () => Navigator.pop(dialogContext, true),
               child: const Text('Reset'),
             ),
           ],
         );
       },
     );
+
+    if (shouldReset != true) {
+      return;
+    }
+
+    onResetDay();
+    if (!context.mounted) {
+      return;
+    }
+
+    ScaffoldMessenger.of(context).showSnackBar(
+      const SnackBar(content: Text('Daily quests were reset.')),
+    );
+  }
+
+  Future<void> _showResetAllConfirmation(BuildContext context) async {
+    final shouldReset = await showDialog<bool>(
+      context: context,
+      builder: (dialogContext) {
+        return AlertDialog(
+          title: const Text('Reset All Progress?'),
+          content: const Text(
+            'This deletes every quest and resets all gold, silver, and XP. '
+            'This cannot be undone.',
+          ),
+          actions: [
+            TextButton(
+              onPressed: () => Navigator.pop(dialogContext, false),
+              child: const Text('Cancel'),
+            ),
+            ElevatedButton(
+              style: ElevatedButton.styleFrom(
+                backgroundColor: Colors.red,
+                foregroundColor: Colors.white,
+              ),
+              onPressed: () => Navigator.pop(dialogContext, true),
+              child: const Text('Reset Everything'),
+            ),
+          ],
+        );
+      },
+    );
+
+    if (shouldReset != true) {
+      return;
+    }
+
+    onResetAll();
   }
 }
 
@@ -299,25 +211,15 @@ class _SectionTitle extends StatelessWidget {
   final String title;
   final IconData icon;
 
-  const _SectionTitle({
-    required this.title,
-    required this.icon,
-  });
+  const _SectionTitle({required this.title, required this.icon});
 
   @override
   Widget build(BuildContext context) {
     return Padding(
-      padding: const EdgeInsets.only(
-        left: 4,
-        bottom: 8,
-      ),
+      padding: const EdgeInsets.only(left: 4, bottom: 8),
       child: Row(
         children: [
-          Icon(
-            icon,
-            color: Colors.amber,
-            size: 21,
-          ),
+          Icon(icon, color: Colors.green, size: 21),
           const SizedBox(width: 8),
           Text(
             title,
@@ -334,21 +236,18 @@ class _SectionTitle extends StatelessWidget {
 
 class _SettingsCard extends StatelessWidget {
   final Widget child;
+  final Color borderColor;
 
-  const _SettingsCard({
-    required this.child,
-  });
+  const _SettingsCard({required this.child, required this.borderColor});
 
   @override
   Widget build(BuildContext context) {
     return Card(
-      color: const Color(0xFF2A1B3D),
+      color: const Color.fromARGB(50, 50, 50, 50),
       margin: EdgeInsets.zero,
       shape: RoundedRectangleBorder(
         borderRadius: BorderRadius.circular(18),
-        side: const BorderSide(
-          color: Colors.white24,
-        ),
+        side: BorderSide(color: borderColor, width: 1.4),
       ),
       child: child,
     );
