@@ -10,6 +10,7 @@ import 'shop_page.dart';
 import '../models/task.dart';
 import 'settings_page.dart';
 import 'statistics_page.dart';
+import 'achievements_page.dart';
 
 //Home page class (stateful due to changing variables while app runs)
 class QuestHomePage extends StatefulWidget {
@@ -26,11 +27,14 @@ class QuestHomePageState extends State<QuestHomePage> {
   int silver = 0;
   int gold = 0;
   int xp = 0;
+  int totalCompletedTasks = 0;
 
   String currentPage = 'quests';
 
   List<Task> tasks = [];
   List<String> inventory = [];
+  Set<String> unlockedAchievements = {};
+  Set<String> completedDays = {};
 
   @override
   void initState() {
@@ -47,6 +51,15 @@ class QuestHomePageState extends State<QuestHomePage> {
     await prefs.setInt('xp', xp);
     await prefs.setString('tasks', jsonEncode(taskData));
     await prefs.setStringList('inventory', inventory);
+    await prefs.setStringList(
+      'achievements',
+      unlockedAchievements.toList(),
+    );
+    await prefs.setInt('totalCompletedTasks', totalCompletedTasks);
+    await prefs.setStringList(
+      'completedDays',
+      completedDays.toList(),
+    );
   }
 
   Future<void> loadProgress() async {
@@ -70,28 +83,52 @@ class QuestHomePageState extends State<QuestHomePage> {
       return;
     }
 
+    final savedAchievements =
+      prefs.getStringList('achievements') ?? [];
+
+    final savedCompletedDays =
+      prefs.getStringList('completedDays') ?? [];
+
     setState(() {
       gold = prefs.getInt('gold') ?? 0;
       silver = prefs.getInt('silver') ?? 0;
       xp = prefs.getInt('xp') ?? 0;
       tasks = loadedTasks;
       inventory = prefs.getStringList('inventory') ?? [];
+      
+      unlockedAchievements = savedAchievements.toSet();
+
+      totalCompletedTasks =
+        prefs.getInt('totalCompletedTasks') ?? 0;
+
+      completedDays = savedCompletedDays.toSet();
+
     });
+    checkAchievements();
   }
 
   void completeTask(Task task) {
     if (task.isDone) {
       return;
     }
-    setState(() {
-      task.isDone = true;
-      task.completedAt = DateTime.now();
+  setState(() {
+    task.isDone = true;
+    task.completedAt = DateTime.now();
 
-      gold += task.gold;
-      silver += task.silver;
-      xp += task.xp;
-    });
-    saveProgress();
+    gold += task.gold;
+    silver += task.silver;
+    xp += task.xp;
+
+   totalCompletedTasks++;
+
+   final date = task.completedAt!;
+   completedDays.add(
+     '${date.year}-${date.month}-${date.day}',
+   );
+  });
+
+checkAchievements();
+saveProgress();
   }
 
   void removeTask(Task task) {
@@ -529,7 +566,56 @@ class QuestHomePageState extends State<QuestHomePage> {
       },
     );
   }
+  void checkAchievements() {
+    final completedTasks =
+        tasks.where((task) => task.isDone).toList();
 
+    final hardTasks = completedTasks
+        .where((task) => task.difficulty == 2)
+        .length;
+
+    final Map<String, bool> requirements = {
+      'first_task': totalCompletedTasks >= 1,
+      'getting_serious': totalCompletedTasks >= 10,
+      'task_master': totalCompletedTasks >= 25,
+      'rising_star': xp >= 500,
+      'hard_worker': hardTasks >= 5,
+      'dedicated': completedDays.length >= 7,
+    };
+
+    bool unlockedSomething = false;
+
+   for (final entry in requirements.entries) {
+    if (entry.value &&
+        !unlockedAchievements.contains(entry.key)) {
+
+     final achievement = achievements.firstWhere(
+       (achievement) => achievement.id == entry.key,
+     );
+
+     setState(() {
+        unlockedAchievements.add(entry.key);
+        gold += achievement.reward;
+     });
+
+     unlockedSomething = true;
+
+     ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+         content: Text(
+           'Achievement Unlocked: ${achievement.title}! '
+           '+${achievement.reward} Gold',
+          ),
+       ),
+      );
+    }
+  }
+
+    if (unlockedSomething) {
+      saveProgress();
+    }
+  }
+  
   //test function to reset day and check variable counts
   void resetDay() {
     int taskamount = tasks.length;
@@ -596,7 +682,13 @@ class QuestHomePageState extends State<QuestHomePage> {
       return StatisticsPage(tasks: tasks, gold: gold, silver: silver, xp: xp);
     } else if (currentPage == 'settings') {
       return SettingsPage(onResetDay: resetDay, onResetAll: resetAllProgress);
-    } else {
+    } else if (currentPage == 'achievements') {
+      return AchievementsPage(
+        unlockedAchievements: unlockedAchievements,
+      );
+    }
+    
+    else {
       return buildQuestBoard();
     }
   }
@@ -805,6 +897,17 @@ class QuestHomePageState extends State<QuestHomePage> {
             onPressed: () {
               setState(() {
                 currentPage = 'statistics';
+              });
+            },
+          ),
+
+          IconButton(
+            icon: const Icon(Icons.emoji_events),
+            color: Colors.amber,
+            tooltip: 'Achievements',
+            onPressed: () {
+              setState(() {
+                currentPage = 'achievements';
               });
             },
           ),
