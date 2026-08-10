@@ -21,7 +21,7 @@ class ShopItemCard extends StatelessWidget {
     final bool canAfford = gold >= cost;
 
     return Card(
-      color: const Color(0xFF2A1B3D),
+      color: const Color.fromARGB(50, 50, 50, 50),
       margin: const EdgeInsets.only(bottom: 14),
       shape: RoundedRectangleBorder(
         borderRadius: BorderRadius.circular(18),
@@ -30,8 +30,10 @@ class ShopItemCard extends StatelessWidget {
           width: 1.4,
         ),
       ),
+
       child: Padding(
         padding: const EdgeInsets.all(14),
+
         child: Row(
           children: [
             Icon(
@@ -40,9 +42,11 @@ class ShopItemCard extends StatelessWidget {
               size: 34,
             ),
             const SizedBox(width: 14),
+
             Expanded(
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
+
                 children: [
                   Text(
                     title,
@@ -52,15 +56,18 @@ class ShopItemCard extends StatelessWidget {
                     ),
                   ),
                   const SizedBox(height: 4),
+
                   Text(description),
+
                   const SizedBox(height: 4),
-                  Text('$cost gold', style: const TextStyle(color: Colors.amber)),
                 ],
               ),
             ),
+
             ElevatedButton(
               onPressed: canAfford ? onBuy : null,
-              child: const Text('Buy'),
+
+              child: Text('$cost gold'),
             ),
           ],
         ),
