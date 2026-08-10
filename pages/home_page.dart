@@ -671,125 +671,129 @@ Future<void> loadProgress() async {
 
   //use over ride again and finally make the scaffold for the whole page
   @override
-  Widget build(BuildContext context) {
-    return Scaffold(
-      appBar: AppBar(
-        toolbarHeight: 50,
-        titleSpacing: 0,
-        leadingWidth: 60,
+Widget build(BuildContext context) {
+  return Scaffold(
+    appBar: AppBar(
+      toolbarHeight: 50,
+      titleSpacing: 0,
+      leadingWidth: 60,
 
-        title: Row(
-          children: [
-            Column(
-              mainAxisSize: MainAxisSize.min,
-
-              children: [
-                Material(
-                  color: Colors.transparent,
-
-                  child: InkWell(
-                    borderRadius: BorderRadius.circular(25),
-                    hoverColor: Colors.white.withAlpha(1),
-                    splashColor: Colors.white.withAlpha(60),
-                    highlightColor: Colors.white.withAlpha(25),
-                    onTap: () {
-                      setState(() {
-                        currentPage = 'quests';
-                      });
-                    },
-
-                    child: Padding(
-                      padding: const EdgeInsets.symmetric(horizontal: 5),
-                      child: Image.asset(
-                        'media/modLogo.png',
-                        height: 38,
-                        width: 100,
-                        fit: BoxFit.contain,
-                        filterQuality: FilterQuality.none,
-                      ),
+      title: Row(
+        children: [
+          Column(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              Material(
+                color: Colors.transparent,
+                child: InkWell(
+                  borderRadius: BorderRadius.circular(25),
+                  hoverColor: Colors.white.withAlpha(1),
+                  splashColor: Colors.white.withAlpha(60),
+                  highlightColor: Colors.white.withAlpha(25),
+                  onTap: () {
+                    setState(() {
+                      currentPage = 'quests';
+                    });
+                  },
+                  child: Padding(
+                    padding: const EdgeInsets.symmetric(horizontal: 5),
+                    child: Image.asset(
+                      'media/modLogo.png',
+                      height: 38,
+                      width: 100,
+                      fit: BoxFit.contain,
+                      filterQuality: FilterQuality.none,
+                      errorBuilder: (context, error, stackTrace) {
+                        return const SizedBox(
+                          height: 38,
+                          width: 100,
+                        );
+                      },
                     ),
                   ),
                 ),
+              ),
 
-                Transform.translate(
-                  offset: const Offset(0, 4),
-
-                  child: Container(
-                    height: 3,
-                    width: 100,
-                    color: currentPage == 'quests'
-                        ? Colors.white
-                        : Colors.white.withAlpha(45),
-                  ),
+              Transform.translate(
+                offset: const Offset(0, 4),
+                child: Container(
+                  height: 3,
+                  width: 100,
+                  color: currentPage == 'quests'
+                      ? Colors.white
+                      : Colors.white.withAlpha(45),
                 ),
-              ],
-            ),
-
-            const SizedBox(width: 5),
-
-            Column(
-              mainAxisSize: MainAxisSize.min,
-
-              children: [
-                TextButton.icon(
-                  style: TextButton.styleFrom(
-                    foregroundColor: Colors.white,
-                    overlayColor: Colors.white.withAlpha(35),
-                  ),
-                  icon: const Icon(Icons.store, size: 30),
-                  label: const Text('Shop', style: TextStyle(fontSize: 25)),
-
-                  onPressed: () {
-                    setState(() {
-                      currentPage = 'shop';
-                    });
-                  },
-                ),
-
-                Transform.translate(
-                  offset: const Offset(0, 5),
-
-                  child: Container(
-                    height: 3,
-                    width: 100,
-                    color: currentPage == 'shop' ? Colors.white : Colors.grey,
-                  ),
-                ),
-              ],
-            ),
-          ],
-        ),
-
-        backgroundColor: const Color.fromARGB(255, 49, 44, 44),
-
-        actions: [
-          IconButton(
-            icon: const Icon(Icons.refresh),
-            tooltip: 'Reset Day',
-            onPressed: resetDay,
+              ),
+            ],
           ),
-          IconButton(
-            icon: const Icon(Icons.bar_chart),
-            tooltip: 'Statistics',
-            onPressed: () {
-              setState(() {
-                currentPage = 'statistics';
-              });
-            },
-          ),
-          IconButton(
-            icon: const Icon(Icons.settings),
-            tooltip: 'Settings',
-            onPressed: () {
-              setState(() {
-                currentPage = 'settings';
-              });
-            },
+
+          const SizedBox(width: 5),
+
+          Column(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              TextButton.icon(
+                style: TextButton.styleFrom(
+                  foregroundColor: Colors.white,
+                  overlayColor: Colors.white.withAlpha(35),
+                ),
+                icon: const Icon(Icons.store, size: 30),
+                label: const Text(
+                  'Shop',
+                  style: TextStyle(fontSize: 25),
+                ),
+                onPressed: () {
+                  setState(() {
+                    currentPage = 'shop';
+                  });
+                },
+              ),
+
+              Transform.translate(
+                offset: const Offset(0, 5),
+                child: Container(
+                  height: 3,
+                  width: 100,
+                  color: currentPage == 'shop'
+                      ? Colors.white
+                      : Colors.grey,
+                ),
+              ),
+            ],
           ),
         ],
       ),
 
-      body: getCurrentPage(),
-    );
-  }
+      backgroundColor: const Color.fromARGB(255, 49, 44, 44),
+
+      actions: [
+        IconButton(
+          icon: const Icon(Icons.refresh),
+          tooltip: 'Reset Day',
+          onPressed: resetDay,
+        ),
+        IconButton(
+          icon: const Icon(Icons.bar_chart),
+          tooltip: 'Statistics',
+          onPressed: () {
+            setState(() {
+              currentPage = 'statistics';
+            });
+          },
+        ),
+        IconButton(
+          icon: const Icon(Icons.settings),
+          tooltip: 'Settings',
+          onPressed: () {
+            setState(() {
+              currentPage = 'settings';
+            });
+          },
+        ),
+      ],
+    ),
+
+    body: getCurrentPage(),
+  );
+}
 }
