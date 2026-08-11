@@ -45,9 +45,9 @@ class Task {
       difficulty: (json['difficulty'] as num?)?.toInt() ?? 0,
       repeatDays: repeatDaysJson is List
           ? repeatDaysJson
-                .whereType<num>()
-                .map((day) => day.toInt())
-                .toList()
+              .whereType<num>()
+              .map((day) => day.toInt())
+              .toList()
           : <int>[],
       gold: (json['gold'] as num?)?.toInt() ?? 0,
       silver: (json['silver'] as num?)?.toInt() ?? 0,
