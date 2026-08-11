@@ -38,6 +38,7 @@ void main() {
     );
 
     state.tasks.add(task);
+    state.unlockedAchievements.add('first_task');
 
     state.completeTask(task);
 
@@ -76,6 +77,7 @@ void main() {
     );
 
     state.tasks.add(task);
+    state.unlockedAchievements.add('first_task');
 
     state.completeTask(task);
     state.completeTask(task);
