@@ -1,25 +1,19 @@
 import 'package:flutter/material.dart';
+import 'package:provider/provider.dart';
 
-import '../models/task.dart';
+import '../state/game_state.dart';
+import '../theme.dart';
 
 class StatisticsPage extends StatelessWidget {
-  final List<Task> tasks;
-  final int gold;
-  final int silver;
-  final int xp;
-
-  const StatisticsPage({
-    super.key,
-    required this.tasks,
-    required this.gold,
-    required this.silver,
-    required this.xp,
-  });
+  const StatisticsPage({super.key});
 
   @override
   Widget build(BuildContext context) {
-    final completedTasks = tasks.where((task) => task.isDone).length;
-    final totalTasks = tasks.length;
+    final gameState = context.watch<GameState>();
+    final mod = gameState.mod;
+
+    final completedTasks = gameState.tasks.where((task) => task.isDone).length;
+    final totalTasks = gameState.tasks.length;
     final completionRate = totalTasks == 0 ? 0.0 : completedTasks / totalTasks;
 
     return Center(
@@ -39,6 +33,13 @@ class StatisticsPage extends StatelessWidget {
                 ),
               ),
               const SizedBox(height: 20),
+              if (mod != null)
+                _StatisticCard(
+                  title: '${mod.name}\'s Level',
+                  value: '${mod.level}',
+                  icon: Icons.trending_up,
+                  color: AppTheme.accentBlue,
+                ),
               _StatisticCard(
                 title: 'Tasks Completed',
                 value: '$completedTasks / $totalTasks',
@@ -47,25 +48,25 @@ class StatisticsPage extends StatelessWidget {
               ),
               _StatisticCard(
                 title: 'Completion Rate',
-                value: '${(completionRate * 100).round()}%',
-                icon: Icons.bar_chart,
+                value: '${(completionRate * 100).toStringAsFixed(0)}%',
+                icon: Icons.percent,
                 color: Colors.green,
               ),
               _StatisticCard(
                 title: 'Gold',
-                value: '$gold',
+                value: '${gameState.gold}',
                 icon: Icons.monetization_on,
                 color: Colors.amber,
               ),
               _StatisticCard(
                 title: 'Silver',
-                value: '$silver',
+                value: '${gameState.silver}',
                 icon: Icons.circle,
                 color: Colors.grey,
               ),
               _StatisticCard(
-                title: 'Experience',
-                value: '$xp XP',
+                title: 'Total XP Earned',
+                value: '${gameState.lifetimeXp}',
                 icon: Icons.star,
                 color: const Color.fromARGB(255, 0, 22, 148),
               ),
@@ -78,8 +79,8 @@ class StatisticsPage extends StatelessWidget {
               LinearProgressIndicator(
                 value: completionRate,
                 minHeight: 14,
-                borderRadius: BorderRadius.circular(10),
-                backgroundColor: Colors.grey.shade300,
+                borderRadius: AppTheme.borderRadius,
+                backgroundColor: AppTheme.track,
                 valueColor: const AlwaysStoppedAnimation<Color>(Colors.green),
               ),
             ],
@@ -106,12 +107,9 @@ class _StatisticCard extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Card(
-      color: const Color.fromARGB(50, 50, 50, 50),
+      color: AppTheme.surface,
       margin: const EdgeInsets.only(bottom: 12),
-      shape: RoundedRectangleBorder(
-        borderRadius: BorderRadius.circular(18),
-        side: BorderSide(color: color, width: 1.4),
-      ),
+      shape: AppTheme.cardShape(sideColor: color, width: 1.4),
       child: ListTile(
         leading: Icon(icon, color: color, size: 30),
         title: Text(title),

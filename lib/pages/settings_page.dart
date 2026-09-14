@@ -1,17 +1,19 @@
 import 'package:flutter/material.dart';
+import 'package:provider/provider.dart';
+
+import '../models/mod_appearance.dart';
+import '../state/game_state.dart';
+import '../theme.dart';
 
 class SettingsPage extends StatelessWidget {
-  final VoidCallback onResetDay;
-  final VoidCallback onResetAll;
-
-  const SettingsPage({
-    super.key,
-    required this.onResetDay,
-    required this.onResetAll,
-  });
+  const SettingsPage({super.key});
 
   @override
   Widget build(BuildContext context) {
+    final gameState = context.watch<GameState>();
+    final mod = gameState.mod;
+    final appearance = mod == null ? null : appearanceById(mod.appearanceId);
+
     return Center(
       child: ConstrainedBox(
         constraints: const BoxConstraints(maxWidth: 650),
@@ -33,20 +35,29 @@ class SettingsPage extends StatelessWidget {
               _SettingsCard(
                 borderColor: Colors.amber,
                 child: ListTile(
-                  leading: const CircleAvatar(
-                    backgroundColor: Colors.amber,
-                    child: Icon(Icons.person, color: Colors.black),
+                  leading: CircleAvatar(
+                    backgroundColor: appearance?.color ?? Colors.amber,
+                    child: Icon(
+                      appearance?.icon ?? Icons.person,
+                      color: Colors.black,
+                    ),
                   ),
-                  title: const Text(
-                    'User',
-                    style: TextStyle(fontWeight: FontWeight.bold),
+                  title: Text(
+                    mod?.name ?? 'User',
+                    style: const TextStyle(fontWeight: FontWeight.bold),
                   ),
-                  subtitle: const Text('MOD player profile'),
+                  subtitle: Text(
+                    mod == null
+                        ? 'MOD player profile'
+                        : 'Level ${mod.level} ${appearance?.label ?? ''}'.trim(),
+                  ),
                   trailing: const Icon(Icons.chevron_right),
                   onTap: () {
                     ScaffoldMessenger.of(context).showSnackBar(
                       const SnackBar(
-                        content: Text('Profile editing is coming soon.'),
+                        content: Text(
+                          'Open the Mod page to rename or restyle your Mod.',
+                        ),
                       ),
                     );
                   },
@@ -60,16 +71,13 @@ class SettingsPage extends StatelessWidget {
               _SettingsCard(
                 borderColor: Colors.orange,
                 child: ListTile(
-                  leading: const Icon(
-                    Icons.restart_alt,
-                    color: Colors.orange,
-                  ),
+                  leading: const Icon(Icons.restart_alt, color: Colors.orange),
                   title: const Text('Reset Daily Quests'),
                   subtitle: const Text(
                     'Mark every quest as incomplete while keeping rewards.',
                   ),
                   trailing: const Icon(Icons.chevron_right),
-                  onTap: () => _showResetDayConfirmation(context),
+                  onTap: () => _showResetDayConfirmation(context, gameState),
                 ),
               ),
               const SizedBox(height: 22),
@@ -82,7 +90,7 @@ class SettingsPage extends StatelessWidget {
                       leading: Icon(Icons.save, color: Colors.green),
                       title: Text('Automatic Local Saving'),
                       subtitle: Text(
-                        'Tasks, inventory, completion status, currency, and XP '
+                        'Your Mod, tasks, shop, inventory, currency, and XP '
                         'are saved.',
                       ),
                       trailing: Icon(Icons.check_circle, color: Colors.green),
@@ -95,11 +103,11 @@ class SettingsPage extends StatelessWidget {
                       ),
                       title: const Text('Reset All Progress'),
                       subtitle: const Text(
-                        'Delete every quest and inventory item, then reset '
-                        'currency and XP.',
+                        'Delete every quest and inventory item, reset the shop, '
+                        'and send your Mod back to level 1.',
                       ),
                       trailing: const Icon(Icons.chevron_right),
-                      onTap: () => _showResetAllConfirmation(context),
+                      onTap: () => _showResetAllConfirmation(context, gameState),
                     ),
                   ],
                 ),
@@ -133,7 +141,10 @@ class SettingsPage extends StatelessWidget {
     );
   }
 
-  Future<void> _showResetDayConfirmation(BuildContext context) async {
+  Future<void> _showResetDayConfirmation(
+    BuildContext context,
+    GameState gameState,
+  ) async {
     final shouldReset = await showDialog<bool>(
       context: context,
       builder: (dialogContext) {
@@ -161,25 +172,29 @@ class SettingsPage extends StatelessWidget {
       return;
     }
 
-    onResetDay();
+    gameState.resetDay();
     if (!context.mounted) {
       return;
     }
 
-    ScaffoldMessenger.of(context).showSnackBar(
-      const SnackBar(content: Text('Daily quests were reset.')),
-    );
+    ScaffoldMessenger.of(
+      context,
+    ).showSnackBar(const SnackBar(content: Text('Daily quests were reset.')));
   }
 
-  Future<void> _showResetAllConfirmation(BuildContext context) async {
+  Future<void> _showResetAllConfirmation(
+    BuildContext context,
+    GameState gameState,
+  ) async {
     final shouldReset = await showDialog<bool>(
       context: context,
       builder: (dialogContext) {
         return AlertDialog(
           title: const Text('Reset All Progress?'),
           content: const Text(
-            'This deletes every quest and resets all gold, silver, and XP. '
-            'This cannot be undone.',
+            'This deletes every quest, resets the shop, and returns your Mod '
+            'to level 1 along with all gold, silver, and XP. Your Mod keeps '
+            'its name and look. This cannot be undone.',
           ),
           actions: [
             TextButton(
@@ -203,7 +218,7 @@ class SettingsPage extends StatelessWidget {
       return;
     }
 
-    onResetAll();
+    gameState.resetAllProgress();
   }
 }
 
@@ -223,10 +238,7 @@ class _SectionTitle extends StatelessWidget {
           const SizedBox(width: 8),
           Text(
             title,
-            style: const TextStyle(
-              fontSize: 19,
-              fontWeight: FontWeight.bold,
-            ),
+            style: const TextStyle(fontSize: 19, fontWeight: FontWeight.bold),
           ),
         ],
       ),
@@ -243,12 +255,9 @@ class _SettingsCard extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Card(
-      color: const Color.fromARGB(50, 50, 50, 50),
+      color: AppTheme.surface,
       margin: EdgeInsets.zero,
-      shape: RoundedRectangleBorder(
-        borderRadius: BorderRadius.circular(18),
-        side: BorderSide(color: borderColor, width: 1.4),
-      ),
+      shape: AppTheme.cardShape(sideColor: borderColor, width: 1.4),
       child: child,
     );
   }

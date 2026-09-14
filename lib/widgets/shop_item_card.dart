@@ -1,34 +1,35 @@
-﻿import 'package:flutter/material.dart';
+import 'package:flutter/material.dart';
+
+import '../models/shop_item.dart';
+import '../models/shop_item_icons.dart';
+import '../theme.dart';
 
 class ShopItemCard extends StatelessWidget {
-  final String title;
-  final int cost;
-  final String description;
+  final ShopItem item;
   final int gold;
   final VoidCallback onBuy;
+  final VoidCallback onEdit;
+  final VoidCallback onDelete;
 
   const ShopItemCard({
     super.key,
-    required this.title,
-    required this.cost,
-    required this.description,
+    required this.item,
     required this.gold,
     required this.onBuy,
+    required this.onEdit,
+    required this.onDelete,
   });
 
   @override
   Widget build(BuildContext context) {
-    final bool canAfford = gold >= cost;
+    final bool canAfford = gold >= item.cost;
 
     return Card(
-      color: const Color.fromARGB(50, 50, 50, 50),
+      color: AppTheme.surface,
       margin: const EdgeInsets.only(bottom: 14),
-      shape: RoundedRectangleBorder(
-        borderRadius: BorderRadius.circular(18),
-        side: BorderSide(
-          color: canAfford ? Colors.amber : Colors.grey,
-          width: 1.4,
-        ),
+      shape: AppTheme.cardShape(
+        sideColor: canAfford ? Colors.amber : Colors.grey,
+        width: 1.4,
       ),
 
       child: Padding(
@@ -37,7 +38,7 @@ class ShopItemCard extends StatelessWidget {
         child: Row(
           children: [
             Icon(
-              Icons.local_mall,
+              shopItemIcon(item.iconId),
               color: canAfford ? Colors.amber : Colors.grey,
               size: 34,
             ),
@@ -49,16 +50,16 @@ class ShopItemCard extends StatelessWidget {
 
                 children: [
                   Text(
-                    title,
+                    item.name,
                     style: const TextStyle(
                       fontSize: 19,
                       fontWeight: FontWeight.bold,
                     ),
                   ),
-                  const SizedBox(height: 4),
-
-                  Text(description),
-
+                  if (item.description.isNotEmpty) ...[
+                    const SizedBox(height: 4),
+                    Text(item.description),
+                  ],
                   const SizedBox(height: 4),
                 ],
               ),
@@ -66,8 +67,24 @@ class ShopItemCard extends StatelessWidget {
 
             ElevatedButton(
               onPressed: canAfford ? onBuy : null,
+              child: Text('${item.cost} gold'),
+            ),
 
-              child: Text('$cost gold'),
+            PopupMenuButton<String>(
+              tooltip: 'Item Options',
+              onSelected: (value) {
+                if (value == 'edit') {
+                  onEdit();
+                } else if (value == 'delete') {
+                  onDelete();
+                }
+              },
+              itemBuilder: (context) {
+                return const [
+                  PopupMenuItem<String>(value: 'edit', child: Text('Edit')),
+                  PopupMenuItem<String>(value: 'delete', child: Text('Delete')),
+                ];
+              },
             ),
           ],
         ),

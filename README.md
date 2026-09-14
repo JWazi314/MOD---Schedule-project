@@ -1,17 +1,48 @@
-# quest_tracker
+# MOD - Schedule App
 
-A new Flutter project.
+** Purpose
 
-## Getting Started
+MOD is a Flutter-based scheduling and productivity application designed to help users organize daily tasks and stay motivated through a reward system.
 
-This project is a starting point for a Flutter application.
+**Functions
 
-A few resources to get you started if this is your first Flutter project:
+- Create and track daily tasks and quests.
+- Mark tasks as completed.
+- Earn Gold, Silver, and XP from completed tasks.
+- Spend Gold in the Reward Shop.
+- Keep purchased rewards in the Inventory.
+- Combine duplicate inventory rewards and display their quantities.
+- View progress and statistics.
+- Save user progress locally between sessions.
+- Obtain achievements that carry over through sessions and give extra currency.
 
-- [Learn Flutter](https://docs.flutter.dev/get-started/learn-flutter)
-- [Write your first Flutter app](https://docs.flutter.dev/get-started/codelab)
-- [Flutter learning resources](https://docs.flutter.dev/reference/learning-resources)
+** Project Structure
 
-For help getting started with Flutter development, view the
-[online documentation](https://docs.flutter.dev/), which offers tutorials,
-samples, guidance on mobile development, and a full API reference.
+```text
+mod/
+├── lib/
+│   ├── models/
+│   ├── pages/
+│   ├── widgets/
+│   ├── app.dart
+│   └── main.dart
+├── android/
+├── ios/
+├── web/
+├── windows/
+├── pubspec.yaml
+└── README.md
+```
+
+** Technologies
+
+- Flutter
+- Dart
+- Material Design
+- Shared Preferences for local progress storage
+
+** Contributors
+
+- Jack Wasilewski
+- Vick Velumani
+- William Bouchie
