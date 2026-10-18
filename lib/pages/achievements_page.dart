@@ -5,51 +5,114 @@ class Achievement {
   final String title;
   final String description;
   final int reward;
+  final IconData icon;
 
   const Achievement({
     required this.id,
     required this.title,
     required this.description,
     required this.reward,
+    required this.icon,
   });
+}
+
+class ProgressRecord {
+  final int totalCompletedTasks;
+  final int totalHardTasksCompleted;
+  final int xp;
+  final int completedDays;
+  final int bestStreak;
+  final int rewardsBought;
+
+  const ProgressRecord({
+    required this.totalCompletedTasks,
+    required this.totalHardTasksCompleted,
+    required this.xp,
+    required this.completedDays,
+    required this.bestStreak,
+    required this.rewardsBought,
+  });
+}
+
+bool isAchievementEarned(String id, ProgressRecord record) {
+  switch (id) {
+    case 'first_task':
+      return record.totalCompletedTasks >= 1;
+    case 'getting_serious':
+      return record.totalCompletedTasks >= 10;
+    case 'task_master':
+      return record.totalCompletedTasks >= 25;
+    case 'rising_star':
+      return record.xp >= 500;
+    case 'hard_worker':
+      return record.totalHardTasksCompleted >= 5;
+    case 'dedicated':
+      return record.completedDays >= 7;
+    case 'on_a_roll':
+      return record.bestStreak >= 3;
+    case 'treat_yourself':
+      return record.rewardsBought >= 1;
+    default:
+      return false;
+  }
 }
 
 const List<Achievement> achievements = [
   Achievement(
     id: 'first_task',
     title: 'One Small Step',
-    description: 'Complete your first task.',
+    description: 'Complete your first quest.',
     reward: 25,
+    icon: Icons.flag,
   ),
   Achievement(
     id: 'getting_serious',
     title: 'Getting Serious',
-    description: 'Complete 10 tasks.',
+    description: 'Complete 10 quests.',
     reward: 50,
+    icon: Icons.trending_up,
   ),
   Achievement(
     id: 'task_master',
     title: 'Task Master',
-    description: 'Complete 25 tasks.',
+    description: 'Complete 25 quests.',
     reward: 75,
+    icon: Icons.military_tech,
   ),
   Achievement(
     id: 'rising_star',
     title: 'Rising Star',
     description: 'Earn 500 XP.',
     reward: 75,
+    icon: Icons.star,
   ),
   Achievement(
     id: 'hard_worker',
     title: 'Hard Worker',
-    description: 'Complete 5 Hard tasks.',
+    description: 'Complete 5 hard quests.',
     reward: 75,
+    icon: Icons.fitness_center,
   ),
   Achievement(
     id: 'dedicated',
     title: 'Dedicated',
-    description: 'Complete tasks on 7 different days.',
+    description: 'Finish quests on 7 different days.',
     reward: 100,
+    icon: Icons.calendar_month,
+  ),
+  Achievement(
+    id: 'on_a_roll',
+    title: 'On a Roll',
+    description: 'Reach a 3-day streak.',
+    reward: 40,
+    icon: Icons.local_fire_department,
+  ),
+  Achievement(
+    id: 'treat_yourself',
+    title: 'Treat Yourself',
+    description: 'Buy a reward from the shop.',
+    reward: 20,
+    icon: Icons.redeem,
   ),
 ];
 
@@ -68,25 +131,19 @@ class AchievementsPage extends StatelessWidget {
         constraints: const BoxConstraints(maxWidth: 800),
         child: Column(
           children: [
-            const SizedBox(height: 20),
-
-            const Row(
-              children: [
-                Icon(
-                  Icons.emoji_events,
-                  color: Colors.amber,
-                  size: 32,
-                ),
-                SizedBox(width: 10),
-                Text(
-                  'Achievements',
-                  style: TextStyle(
-                    fontSize: 28,
-                    fontWeight: FontWeight.bold,
-                    color: Colors.amber,
+            const SizedBox(height: 8),
+            const Padding(
+              padding: EdgeInsets.symmetric(horizontal: 20),
+              child: Row(
+                children: [
+                  Icon(Icons.emoji_events, color: Color(0xFFC4A35A), size: 28),
+                  SizedBox(width: 10),
+                  Text(
+                    'Achievements',
+                    style: TextStyle(fontSize: 26, fontWeight: FontWeight.w800),
                   ),
-                ),
-              ],
+                ],
+              ),
             ),
 
             const SizedBox(height: 20),
@@ -101,17 +158,13 @@ class AchievementsPage extends StatelessWidget {
                       unlockedAchievements.contains(achievement.id);
 
                   return Card(
-                    color: unlocked
-                        ? const Color(0xFF2A1B3D)
-                        : const Color(0xFF202020),
-                    margin: const EdgeInsets.only(bottom: 14),
+                    margin: const EdgeInsets.only(bottom: 12),
                     shape: RoundedRectangleBorder(
                       borderRadius: BorderRadius.circular(18),
                       side: BorderSide(
                         color: unlocked
-                            ? Colors.amber
-                            : Colors.grey.shade700,
-                        width: 1.4,
+                            ? const Color(0xFFC4A35A)
+                            : Colors.grey.shade300,
                       ),
                     ),
                     child: ListTile(
@@ -120,34 +173,21 @@ class AchievementsPage extends StatelessWidget {
                         vertical: 10,
                       ),
                       leading: Icon(
-                        unlocked
-                            ? Icons.emoji_events
-                            : Icons.lock,
-                        color: unlocked
-                            ? Colors.amber
-                            : Colors.grey,
-                        size: 34,
+                        unlocked ? achievement.icon : Icons.lock,
+                        color: unlocked ? const Color(0xFFC4A35A) : Colors.grey,
+                        size: 30,
                       ),
                       title: Text(
                         achievement.title,
                         style: TextStyle(
-                          fontSize: 21,
-                          fontWeight: FontWeight.bold,
-                          color: unlocked
-                              ? Colors.white
-                              : Colors.grey,
+                          fontSize: 18,
+                          fontWeight: FontWeight.w800,
+                          color: unlocked ? null : Colors.grey,
                         ),
                       ),
                       subtitle: Padding(
-                        padding: const EdgeInsets.only(top: 5),
-                        child: Text(
-                          achievement.description,
-                          style: TextStyle(
-                            color: unlocked
-                                ? Colors.white70
-                                : Colors.grey.shade600,
-                          ),
-                        ),
+                        padding: const EdgeInsets.only(top: 4),
+                        child: Text(achievement.description),
                       ),
                       trailing: unlocked
                           ? Container(

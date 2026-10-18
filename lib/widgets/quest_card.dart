@@ -1,120 +1,195 @@
 import 'package:flutter/material.dart';
+
 import '../models/task.dart';
 
 class QuestCard extends StatelessWidget {
   final Task task;
   final bool isDone;
-
+  final bool scheduledToday;
   final VoidCallback onComplete;
   final VoidCallback onEdit;
-  final VoidCallback onDelete;
 
   const QuestCard({
     super.key,
     required this.task,
     required this.isDone,
-
+    required this.scheduledToday,
     required this.onComplete,
     required this.onEdit,
-    required this.onDelete,
   });
 
-  Color taskColor(Task task) {
-    if (task.difficulty == 0) {
-      return Colors.green;
-    } else if (task.difficulty == 1) {
-      return Colors.amber;
-    } else if (task.difficulty == 2) {
-      return Colors.red;
+  Color get _accent {
+    if (isDone) {
+      return const Color(0xFF2F6B4F);
     }
-
-    return Colors.grey;
+    switch (task.difficulty) {
+      case 1:
+        return const Color(0xFFC4841D);
+      case 2:
+        return const Color(0xFFB23A48);
+      default:
+        return const Color(0xFF3D8B6E);
+    }
   }
 
   @override
   Widget build(BuildContext context) {
+    final scheme = Theme.of(context).colorScheme;
+    final muted = isDone ? scheme.onSurface.withValues(alpha: 0.55) : scheme.onSurface;
+
     return Card(
-      // Information on the card format
-      color: const Color.fromARGB(50, 50, 50, 50),
       margin: const EdgeInsets.only(bottom: 10),
-      shape: RoundedRectangleBorder(
-        borderRadius: BorderRadius.circular(25),
-
-        side: BorderSide(
-          color: isDone
-              ? const Color.fromARGB(255, 51, 255, 0)
-              : taskColor(task),
-          width: 1.8,
-        ),
-      ),
-
-      //info and functionality inside the card
-
-      //left side
-      child: Padding(
-        padding: const EdgeInsets.all(2),
-        child: Row(
-          children: [
-            Expanded(
-              child: InkWell(
-                onTap: onEdit,
-
-                borderRadius: BorderRadius.circular(20),
-                hoverColor: taskColor(task).withValues(alpha: 0.2),
-                splashColor: Colors.transparent,
-                highlightColor: taskColor(task),
-
+      clipBehavior: Clip.antiAlias,
+      child: InkWell(
+        onTap: onEdit,
+        child: IntrinsicHeight(
+          child: Row(
+            crossAxisAlignment: CrossAxisAlignment.stretch,
+            children: [
+              Container(width: 6, color: _accent),
+              Expanded(
                 child: Padding(
-                  padding: const EdgeInsets.symmetric(
-                    vertical: 20,
-                    horizontal: 14,
-                  ),
-
+                  padding: const EdgeInsets.fromLTRB(12, 12, 4, 12),
                   child: Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
-                      const SizedBox(width: 14),
-
                       Text(
                         task.title,
-                        style: const TextStyle(
-                          fontSize: 19,
-                          fontWeight: FontWeight.bold,
+                        style: TextStyle(
+                          fontSize: 17,
+                          fontWeight: FontWeight.w700,
+                          color: muted,
+                          decoration: isDone ? TextDecoration.lineThrough : null,
                         ),
                       ),
-
-                      const SizedBox(height: 4),
-
-                      Wrap(spacing: 12, runSpacing: 4, children: []),
+                      if (task.note.isNotEmpty) ...[
+                        const SizedBox(height: 2),
+                        Text(
+                          task.note,
+                          maxLines: 2,
+                          overflow: TextOverflow.ellipsis,
+                          style: TextStyle(
+                            color: scheme.onSurface.withValues(alpha: 0.65),
+                          ),
+                        ),
+                      ],
+                      const SizedBox(height: 8),
+                      Wrap(
+                        spacing: 6,
+                        runSpacing: 6,
+                        crossAxisAlignment: WrapCrossAlignment.center,
+                        children: [
+                          _MetaChip(icon: Icons.folder_outlined, label: task.section),
+                          _MetaChip(
+                            icon: Icons.speed,
+                            label: task.difficultyLabel,
+                            color: _accent,
+                          ),
+                          if (task.isTodo)
+                            const _MetaChip(icon: Icons.task_alt, label: 'To-do')
+                          else if (!scheduledToday)
+                            const _MetaChip(icon: Icons.event, label: 'Later'),
+                          if (task.streak > 0)
+                            _MetaChip(
+                              icon: Icons.local_fire_department,
+                              label: '${task.streak}',
+                              color: const Color(0xFFC4841D),
+                            ),
+                        ],
+                      ),
+                      if (!task.isTodo) ...[
+                        const SizedBox(height: 8),
+                        Text(
+                          _scheduleLabel(task),
+                          style: TextStyle(
+                            fontSize: 12,
+                            fontWeight: FontWeight.w600,
+                            color: scheme.onSurfaceVariant,
+                          ),
+                        ),
+                      ],
+                      const SizedBox(height: 8),
+                      Wrap(
+                        spacing: 12,
+                        runSpacing: 4,
+                        children: [
+                          _Payout(icon: Icons.monetization_on, label: '${task.gold}', color: const Color(0xFFC4A35A)),
+                          _Payout(icon: Icons.toll, label: '${task.silver}', color: const Color(0xFF8D8D8D)),
+                          _Payout(icon: Icons.star, label: '${task.xp}', color: const Color(0xFF2F6B4F)),
+                        ],
+                      ),
                     ],
                   ),
                 ),
               ),
-            ),
-
-            const SizedBox(width: 12),
-
-            //Right side of the questCard
-            InkWell(
-              onTap: isDone ? null : onComplete,
-
-              customBorder: RoundedRectangleBorder(
-                borderRadius: BorderRadius.circular(10),
+              IconButton(
+                tooltip: isDone ? 'Completed' : 'Complete',
+                onPressed: isDone ? null : onComplete,
+                icon: Icon(
+                  isDone ? Icons.check_box : Icons.check_box_outline_blank,
+                  color: isDone ? const Color(0xFF2F6B4F) : scheme.onSurfaceVariant,
+                  size: 30,
+                ),
               ),
-
-              hoverColor: Colors.greenAccent.withValues(alpha: 0.15),
-
-              child: Icon(
-                isDone ? Icons.check_box : Icons.check_box_outline_blank,
-                color: isDone ? Colors.greenAccent : Colors.white54,
-                size: 40,
-              ),
-            ),
-
-            const SizedBox(width: 8),
-          ],
+            ],
+          ),
         ),
       ),
+    );
+  }
+}
+
+String _scheduleLabel(Task task) {
+  const names = ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun'];
+  final days = task.repeatDays
+      .where((day) => day >= 0 && day < names.length)
+      .map((day) => names[day]);
+  if (days.isEmpty) {
+    return 'Repeats';
+  }
+  return days.join(' · ');
+}
+
+class _MetaChip extends StatelessWidget {
+  final IconData icon;
+  final String label;
+  final Color? color;
+
+  const _MetaChip({required this.icon, required this.label, this.color});
+
+  @override
+  Widget build(BuildContext context) {
+    final tint = color ?? Theme.of(context).colorScheme.onSurfaceVariant;
+    return Row(
+      mainAxisSize: MainAxisSize.min,
+      children: [
+        Icon(icon, size: 14, color: tint),
+        const SizedBox(width: 3),
+        Text(
+          label,
+          style: TextStyle(fontSize: 12, color: tint, fontWeight: FontWeight.w600),
+        ),
+      ],
+    );
+  }
+}
+
+class _Payout extends StatelessWidget {
+  final IconData icon;
+  final String label;
+  final Color color;
+
+  const _Payout({required this.icon, required this.label, required this.color});
+
+  @override
+  Widget build(BuildContext context) {
+    return Row(
+      mainAxisSize: MainAxisSize.min,
+      children: [
+        Icon(icon, size: 16, color: color),
+        const SizedBox(width: 3),
+        Text(label, style: const TextStyle(fontWeight: FontWeight.w600)),
+      ],
     );
   }
 }

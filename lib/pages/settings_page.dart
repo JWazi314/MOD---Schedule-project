@@ -1,11 +1,15 @@
 import 'package:flutter/material.dart';
 
 class SettingsPage extends StatelessWidget {
-  final VoidCallback onResetDay;
+  final String playerName;
+  final ValueChanged<String> onRename;
+  final int Function() onResetDay;
   final VoidCallback onResetAll;
 
   const SettingsPage({
     super.key,
+    required this.playerName,
+    required this.onRename,
     required this.onResetDay,
     required this.onResetAll,
   });
@@ -34,22 +38,16 @@ class SettingsPage extends StatelessWidget {
                 borderColor: Colors.amber,
                 child: ListTile(
                   leading: const CircleAvatar(
-                    backgroundColor: Colors.amber,
-                    child: Icon(Icons.person, color: Colors.black),
+                    backgroundColor: Color(0xFF2F6B4F),
+                    child: Icon(Icons.person, color: Colors.white),
                   ),
-                  title: const Text(
-                    'User',
-                    style: TextStyle(fontWeight: FontWeight.bold),
+                  title: Text(
+                    playerName,
+                    style: const TextStyle(fontWeight: FontWeight.bold),
                   ),
-                  subtitle: const Text('MOD player profile'),
-                  trailing: const Icon(Icons.chevron_right),
-                  onTap: () {
-                    ScaffoldMessenger.of(context).showSnackBar(
-                      const SnackBar(
-                        content: Text('Profile editing is coming soon.'),
-                      ),
-                    );
-                  },
+                  subtitle: const Text('The name shown on your player card'),
+                  trailing: const Icon(Icons.edit),
+                  onTap: () => _rename(context),
                 ),
               ),
               const SizedBox(height: 22),
@@ -64,9 +62,9 @@ class SettingsPage extends StatelessWidget {
                     Icons.restart_alt,
                     color: Colors.orange,
                   ),
-                  title: const Text('Reset Daily Quests'),
+                  title: const Text('Start a new day'),
                   subtitle: const Text(
-                    'Mark every quest as incomplete while keeping rewards.',
+                    'Clear today\'s checkmarks. A daily you skipped loses its streak.',
                   ),
                   trailing: const Icon(Icons.chevron_right),
                   onTap: () => _showResetDayConfirmation(context),
@@ -121,7 +119,7 @@ class SettingsPage extends StatelessWidget {
                     ListTile(
                       leading: Icon(Icons.code, color: Colors.green),
                       title: Text('Version'),
-                      trailing: Text('1.0.0'),
+                      trailing: Text('1.1.0'),
                     ),
                   ],
                 ),
@@ -138,10 +136,10 @@ class SettingsPage extends StatelessWidget {
       context: context,
       builder: (dialogContext) {
         return AlertDialog(
-          title: const Text('Reset Daily Quests?'),
+          title: const Text('Start a new day?'),
           content: const Text(
-            'This marks every quest as incomplete. Gold, silver, and XP stay '
-            'the same.',
+            'Checkmarks clear for another round. Gold, silver, and XP stay. '
+            'A repeating quest that was due today and left undone loses its streak.',
           ),
           actions: [
             TextButton(
@@ -161,14 +159,29 @@ class SettingsPage extends StatelessWidget {
       return;
     }
 
-    onResetDay();
+    final broken = onResetDay();
     if (!context.mounted) {
       return;
     }
 
-    ScaffoldMessenger.of(context).showSnackBar(
-      const SnackBar(content: Text('Daily quests were reset.')),
+    final message = broken == 0
+        ? 'A new day started. Your streaks held.'
+        : broken == 1
+        ? 'A new day started. 1 streak ended.'
+        : 'A new day started. $broken streaks ended.';
+    ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text(message)));
+  }
+
+  Future<void> _rename(BuildContext context) async {
+    final name = await showDialog<String>(
+      context: context,
+      builder: (dialogContext) => _RenameDialog(initialName: playerName),
     );
+    final trimmed = name?.trim() ?? '';
+    if (trimmed.isEmpty) {
+      return;
+    }
+    onRename(trimmed);
   }
 
   Future<void> _showResetAllConfirmation(BuildContext context) async {
@@ -204,6 +217,56 @@ class SettingsPage extends StatelessWidget {
     }
 
     onResetAll();
+  }
+}
+
+class _RenameDialog extends StatefulWidget {
+  final String initialName;
+
+  const _RenameDialog({required this.initialName});
+
+  @override
+  State<_RenameDialog> createState() => _RenameDialogState();
+}
+
+class _RenameDialogState extends State<_RenameDialog> {
+  late final TextEditingController _controller;
+
+  @override
+  void initState() {
+    super.initState();
+    _controller = TextEditingController(text: widget.initialName);
+  }
+
+  @override
+  void dispose() {
+    _controller.dispose();
+    super.dispose();
+  }
+
+  void _save() {
+    Navigator.of(context).pop(_controller.text);
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return AlertDialog(
+      title: const Text('Your name'),
+      content: TextField(
+        controller: _controller,
+        autofocus: true,
+        textCapitalization: TextCapitalization.words,
+        decoration: const InputDecoration(labelText: 'Name'),
+        onSubmitted: (_) => _save(),
+      ),
+      actions: [
+        TextButton(
+          onPressed: () => Navigator.of(context).pop(),
+          child: const Text('Cancel'),
+        ),
+        FilledButton(onPressed: _save, child: const Text('Save')),
+      ],
+    );
   }
 }
 
