@@ -99,6 +99,8 @@ void main() {
       section: 'Habits',
       isDone: true,
       completedAt: DateTime(2026, 8, 10, 18, 30),
+      note: 'Skip the drive-through',
+      streak: 4,
     );
 
     final restored = Task.fromJson(original.toJson());
@@ -112,5 +114,25 @@ void main() {
     expect(restored.section, original.section);
     expect(restored.isDone, original.isDone);
     expect(restored.completedAt, original.completedAt);
+    expect(restored.note, original.note);
+    expect(restored.streak, original.streak);
+  });
+
+  test('Task fromJson keeps older saves that have no streak or note', () {
+    final task = Task.fromJson({
+      'title': 'Read',
+      'difficulty': 0,
+      'repeatDays': [0],
+      'gold': 5,
+      'silver': 2,
+      'xp': 25,
+      'section': 'Personal',
+      'isDone': false,
+    });
+
+    expect(task.note, '');
+    expect(task.streak, 0);
+    expect(task.showsOnTodayBoard(DateTime(2026, 10, 19)), true);
+    expect(task.showsOnTodayBoard(DateTime(2026, 10, 20)), false);
   });
 }

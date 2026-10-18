@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 
+import '../game/progression.dart';
 import '../models/task.dart';
 
 class StatisticsPage extends StatelessWidget {
@@ -7,6 +8,9 @@ class StatisticsPage extends StatelessWidget {
   final int gold;
   final int silver;
   final int xp;
+  final int totalCompleted;
+  final int bestStreak;
+  final int rewardsBought;
 
   const StatisticsPage({
     super.key,
@@ -14,76 +18,89 @@ class StatisticsPage extends StatelessWidget {
     required this.gold,
     required this.silver,
     required this.xp,
+    required this.totalCompleted,
+    required this.bestStreak,
+    required this.rewardsBought,
   });
 
   @override
   Widget build(BuildContext context) {
-    final completedTasks = tasks.where((task) => task.isDone).length;
-    final totalTasks = tasks.length;
-    final completionRate = totalTasks == 0 ? 0.0 : completedTasks / totalTasks;
+    final dueToday = tasks.where((task) => task.showsOnTodayBoard()).toList();
+    final doneToday = dueToday.where((task) => task.isDone).length;
+    final todayRate = dueToday.isEmpty ? 0.0 : doneToday / dueToday.length;
+    final level = levelForXp(xp);
 
     return Center(
       child: ConstrainedBox(
         constraints: const BoxConstraints(maxWidth: 650),
-        child: SingleChildScrollView(
+        child: ListView(
           padding: const EdgeInsets.all(20),
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.stretch,
-            children: [
-              const Text(
-                'Statistics',
-                style: TextStyle(
-                  fontSize: 28,
-                  fontWeight: FontWeight.bold,
-                  color: Colors.green,
-                ),
-              ),
-              const SizedBox(height: 20),
-              _StatisticCard(
-                title: 'Tasks Completed',
-                value: '$completedTasks / $totalTasks',
-                icon: Icons.check_circle,
-                color: Colors.green,
-              ),
-              _StatisticCard(
-                title: 'Completion Rate',
-                value: '${(completionRate * 100).round()}%',
-                icon: Icons.bar_chart,
-                color: Colors.green,
-              ),
-              _StatisticCard(
-                title: 'Gold',
-                value: '$gold',
-                icon: Icons.monetization_on,
-                color: Colors.amber,
-              ),
-              _StatisticCard(
-                title: 'Silver',
-                value: '$silver',
-                icon: Icons.circle,
-                color: Colors.grey,
-              ),
-              _StatisticCard(
-                title: 'Experience',
-                value: '$xp XP',
-                icon: Icons.star,
-                color: const Color.fromARGB(255, 0, 22, 148),
-              ),
-              const SizedBox(height: 12),
-              const Text(
-                'Daily Progress',
-                style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold),
-              ),
-              const SizedBox(height: 10),
-              LinearProgressIndicator(
-                value: completionRate,
-                minHeight: 14,
-                borderRadius: BorderRadius.circular(10),
-                backgroundColor: Colors.grey.shade300,
-                valueColor: const AlwaysStoppedAnimation<Color>(Colors.green),
-              ),
-            ],
-          ),
+          children: [
+            const Text(
+              'Statistics',
+              style: TextStyle(fontSize: 26, fontWeight: FontWeight.w800),
+            ),
+            const SizedBox(height: 6),
+            const Text('How the days are adding up.'),
+            const SizedBox(height: 16),
+            Text(
+              'Today',
+              style: Theme.of(context).textTheme.titleMedium,
+            ),
+            const SizedBox(height: 8),
+            LinearProgressIndicator(
+              value: todayRate,
+              minHeight: 12,
+              borderRadius: BorderRadius.circular(10),
+              backgroundColor: const Color(0xFFE7E1D8),
+              color: const Color(0xFF2F6B4F),
+            ),
+            const SizedBox(height: 6),
+            Text('$doneToday of ${dueToday.length} due today'),
+            const SizedBox(height: 16),
+            _StatisticCard(
+              title: 'Level',
+              value: '$level',
+              icon: Icons.shield,
+              color: const Color(0xFF2F6B4F),
+            ),
+            _StatisticCard(
+              title: 'Completed all-time',
+              value: '$totalCompleted',
+              icon: Icons.check_circle,
+              color: const Color(0xFF2F6B4F),
+            ),
+            _StatisticCard(
+              title: 'Best streak',
+              value: bestStreak == 1 ? '1 day' : '$bestStreak days',
+              icon: Icons.local_fire_department,
+              color: const Color(0xFFC4841D),
+            ),
+            _StatisticCard(
+              title: 'Rewards bought',
+              value: '$rewardsBought',
+              icon: Icons.redeem,
+              color: const Color(0xFFC4A35A),
+            ),
+            _StatisticCard(
+              title: 'Gold',
+              value: '$gold',
+              icon: Icons.monetization_on,
+              color: const Color(0xFFC4A35A),
+            ),
+            _StatisticCard(
+              title: 'Silver',
+              value: '$silver',
+              icon: Icons.toll,
+              color: const Color(0xFF8A8A8A),
+            ),
+            _StatisticCard(
+              title: 'Experience',
+              value: '$xp XP',
+              icon: Icons.star,
+              color: const Color(0xFF2F6B4F),
+            ),
+          ],
         ),
       ),
     );
@@ -106,18 +123,13 @@ class _StatisticCard extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Card(
-      color: const Color.fromARGB(50, 50, 50, 50),
-      margin: const EdgeInsets.only(bottom: 12),
-      shape: RoundedRectangleBorder(
-        borderRadius: BorderRadius.circular(18),
-        side: BorderSide(color: color, width: 1.4),
-      ),
+      margin: const EdgeInsets.only(bottom: 10),
       child: ListTile(
-        leading: Icon(icon, color: color, size: 30),
+        leading: Icon(icon, color: color),
         title: Text(title),
         trailing: Text(
           value,
-          style: const TextStyle(fontSize: 19, fontWeight: FontWeight.bold),
+          style: const TextStyle(fontSize: 18, fontWeight: FontWeight.w800),
         ),
       ),
     );

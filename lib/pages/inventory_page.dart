@@ -19,7 +19,7 @@ class InventoryPage extends StatelessWidget {
       case 'Gaming Night':
         return Icons.sports_esports;
       default:
-        return Icons.inventory_2;
+        return Icons.redeem;
     }
   }
 
@@ -89,15 +89,7 @@ class InventoryPage extends StatelessWidget {
                     final item = entries[index];
 
                     return Card(
-                      color: const Color.fromARGB(50, 50, 50, 50),
-                      margin: const EdgeInsets.only(bottom: 14),
-                      shape: RoundedRectangleBorder(
-                        borderRadius: BorderRadius.circular(18),
-                        side: const BorderSide(
-                          color: Colors.amber,
-                          width: 1.4,
-                        ),
-                      ),
+                      margin: const EdgeInsets.only(bottom: 12),
                       child: Padding(
                         padding: const EdgeInsets.symmetric(
                           horizontal: 14,
